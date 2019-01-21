@@ -1,0 +1,4 @@
+*.d
+*.o
+nes_icon.cpp
+nes_icon.h
