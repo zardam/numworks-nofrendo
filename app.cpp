@@ -48,7 +48,7 @@ void App::willBecomeInactive() {
 }
 
 App::App(Container * container, Snapshot * snapshot) :
-  ::App(container, snapshot, &m_nesController),
+  ::App(snapshot, &m_nesController),
   m_appsContainer((AppsContainer*) container)
 {
 }

@@ -1,3 +1,11 @@
+ifeq ($(PLATFORM),device)
+SFLAGS += -DDEVICE
+endif
+
+ifeq ($(MODEL),n0110)
+SFLAGS += -DN110
+endif
+
 include apps/nes/nofrendo/Makefile
 
 apps += NES::App

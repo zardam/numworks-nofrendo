@@ -1,8 +1,8 @@
 #include <ion.h>
 #include <kandinsky.h>
 #include "nofrendo_wrapper.h"
-#ifdef EPSILON_DEVICE_BENCH
-#include "../../ion/src/device/display.h"
+#ifdef DEVICE
+#include "../../ion/src/device/shared/drivers/display.h"
 #endif
 
 extern "C" {
@@ -28,44 +28,44 @@ void draw_scanline(uint8_t *bmp, uint16_t *palette, int scanline) {
   }
   int xoffset = (Ion::Display::Width - NES_SCREEN_WIDTH) / 2;
   int yoffset = (Ion::Display::Height - NES_SCREEN_HEIGHT) / 2;
-#if EPSILON_DEVICE_BENCH
-  Ion::Display::Device::setDrawingArea(KDRect(xoffset, scanline+yoffset, NES_SCREEN_WIDTH, 1), Ion::Display::Device::Orientation::Portrait);
-  *Ion::Display::Device::CommandAddress  = Ion::Display::Device::Command::MemoryWrite;
+#ifdef DEVICE
+  Ion::Device::Display::setDrawingArea(KDRect(xoffset, scanline+yoffset, NES_SCREEN_WIDTH, 1), Ion::Device::Display::Orientation::Portrait);
+  *Ion::Device::Display::CommandAddress  = Ion::Device::Display::Command::MemoryWrite;
   uint8_t *pixels = bmp + NES_SCREEN_WIDTH + 7;
   size_t numberOfPixels = NES_SCREEN_WIDTH;
   while (numberOfPixels >= 32) {
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
-    *Ion::Display::Device::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
+    *Ion::Device::Display::DataAddress = palette[*pixels--];
     numberOfPixels -= 32;
   }
 
@@ -79,26 +79,9 @@ void draw_scanline(uint8_t *bmp, uint16_t *palette, int scanline) {
 #endif
 }
 
-#if EPSILON_DEVICE_BENCH
+#ifdef DEVICE
 uint32_t micros() {
-  // Here, we can use the current value of the systick counter to get a
-  // microsecond resolution counter. The problem is that the systick interrupt
-  // may occur between reading millis_elapsed and reading the current value
-  // of the systick counter. To cope with this, we do two consecutive reading
-  // of both values. Do not forget that the counter counts backwards down to zero.
-  uint32_t c1 = CM4.SYST_CVR()->getCURRENT();
-  uint32_t ms1 = Ion::Timing::millis();
-  uint32_t c2 = CM4.SYST_CVR()->getCURRENT();
-  uint32_t ms2 = Ion::Timing::millis();
-  uint32_t load = CM4.SYST_RVR()->getRELOAD();
-  // If c1 > c2, then no systick interrupt occured between reading c1 and ms1, so ms1
-  // value is correct, else an interrupt occured and ms2 value is correct. So we
-  // have the milliseconds part : "((c1 > c2) ? ms1 : ms2) * 1000"
-  // Then, we just add and scale the value of c2, as it is correct in both case.
-  // We do "(load - c2)" to convert from a backward count to a forward count,
-  // and then scale it to microseconds "* 1000) / (load + 1)" (as load is
-  // the number of ticks per milliseconds minus one)
-  return ((c1 > c2) ? ms1 : ms2) * 1000 + ((load - c2) * 1000) / (load + 1);
+  return Ion::Timing::millis() * 1000;
 }
 #else
 #include <chrono>
@@ -115,50 +98,50 @@ uint32_t micros() {
 void draw(bitmap_t *bmp, uint16 *palette) {
   int xoffset = (Ion::Display::Width - bmp->width) / 2;
   int yoffset = (Ion::Display::Height - bmp->height) / 2;
-#if EPSILON_DEVICE_BENCH
+#if DEVICE
     for(int y=0; y<bmp->height; y++) {
-      Ion::Display::Device::setDrawingArea(KDRect(xoffset, y+yoffset, bmp->width, 1), Ion::Display::Device::Orientation::Portrait);
+      Ion::Device::Display::setDrawingArea(KDRect(xoffset, y+yoffset, bmp->width, 1), Ion::Device::Display::Orientation::Portrait);
 
-      *Ion::Display::Device::CommandAddress  = Ion::Display::Device::Command::MemoryWrite;
+      *Ion::Device::Display::CommandAddress  = Ion::Device::Display::Command::MemoryWrite;
       uint8_t *pixels = bmp->line[y] + bmp->width;
       size_t numberOfPixels = bmp->width;
       while (numberOfPixels >= 32) {
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
         numberOfPixels -= 32;
       }
       while (numberOfPixels--) {
-        *Ion::Display::Device::DataAddress = palette[*pixels--];
+        *Ion::Device::Display::DataAddress = palette[*pixels--];
       }
     }
 #else

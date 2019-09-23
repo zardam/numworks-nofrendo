@@ -84,4 +84,4 @@ endif
 
 #$(call object_for,$(nof_src)): SFLAGS := $(subst -Os,-O2,$(SFLAGS))
 
-src += $(nof_src)
+app_src += $(nof_src)

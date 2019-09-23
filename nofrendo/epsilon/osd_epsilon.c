@@ -90,7 +90,7 @@ void osd_togglefullscreen(int code)
 
 void osd_getinput(void)
 {
-  const int events[8]={
+  const int events[9]={
     event_joypad1_left,
     event_joypad1_up,
     event_joypad1_down,
@@ -98,7 +98,8 @@ void osd_getinput(void)
     event_joypad1_b,
     event_joypad1_a,
     event_joypad1_select,
-    event_joypad1_start
+    event_joypad1_start,
+    event_joypad1_start,
   };
   static uint64_t old_keys_pressed = 0xffffffffffffffff;
 
@@ -108,10 +109,10 @@ void osd_getinput(void)
 
   if(cur_keys_pressed & (1<<17)) {
     event_get(event_hard_reset)(INP_STATE_MAKE);
-  } else if(cur_keys_pressed > 255) {
+  } else if(cur_keys_pressed > 511) {
     event_get(event_quit)(INP_STATE_MAKE);
   }
-  for (int i=0; i<8; i++) {
+  for (int i=0; i<9; i++) {
     if (chg_keys_pressed & 1) {
       event_t evt = event_get(events[i]);
       if (evt) evt((cur_keys_pressed & 1) ? INP_STATE_MAKE : INP_STATE_BREAK);
@@ -152,21 +153,21 @@ int osd_init()
 	return 0;
 }
 
-#if EPSILON_DEVICE_BENCH
-  extern const unsigned char _data_section_start_flash;
-  extern const unsigned char _data_section_start_ram;
-  extern const unsigned char _data_section_end_ram;
-  const char *osd_getromdata() {
-    char *firmware_end = (char*) (&_data_section_end_ram - &_data_section_start_ram + &_data_section_start_flash);
-    if(firmware_end[4] == 'N' && firmware_end[5] == 'E' && firmware_end[6] == 'S') {
-      return firmware_end + 4;
-    } else {
-      return firmware_end + 16;
-    }
-  }
+#if DEVICE
+extern const unsigned char _data_section_start_flash;
+extern const unsigned char _data_section_start_ram;
+extern const unsigned char _data_section_end_ram;
+
+const char *osd_getromdata() {
+#if N110
+  return (char*) 0x90400000;
 #else
-  extern const unsigned char _rom_data[];
-  const char *osd_getromdata() {
-    return (char*) _rom_data;
-  }
+  return (char*) (&_data_section_end_ram - &_data_section_start_ram + &_data_section_start_flash);
+#endif
+}
+#else
+extern const unsigned char _rom_data[];
+const char *osd_getromdata() {
+  return (char*) _rom_data;
+}
 #endif

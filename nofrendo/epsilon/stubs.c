@@ -1,4 +1,4 @@
-#ifdef EPSILON_DEVICE_BENCH
+#ifdef DEVICE
 
 #include <stdio.h>
 #include <stdlib.h>
