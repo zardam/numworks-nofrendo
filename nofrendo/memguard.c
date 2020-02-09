@@ -3,14 +3,14 @@
 **
 **
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of version 2 of the GNU Library General 
+** modify it under the terms of version 2 of the GNU Library General
 ** Public License as published by the Free Software Foundation.
 **
-** This program is distributed in the hope that it will be useful, 
+** This program is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
-** Library General Public License for more details.  To obtain a 
-** copy of the GNU Library General Public License, write to the Free 
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+** Library General Public License for more details.  To obtain a
+** copy of the GNU Library General Public License, write to the Free
 ** Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 **
 ** Any permitted reproduction of these routines, in whole or in part,
@@ -27,6 +27,7 @@
 
 #include <noftypes.h>
 #include <memguard.h>
+#include <nofrendo_wrapper.h>
 
 /* undefine macro definitions, so we get real calls */
 #undef malloc
@@ -85,7 +86,7 @@ static int mem_checkguardblock(void *data, int guard_size)
       /* wrap */
       if ('\0' == *check)
          check = GUARD_STRING;
-      
+
       if (*block++ != *check++)
          return -1;
    }
@@ -131,7 +132,7 @@ static void *mem_guardalloc(int alloc_size, int guard_size)
       return NULL;
 
    block = (char *) orig;
-   
+
    /* get it to the pointer we will actually return */
    orig = (void *) ((char *) orig + guard_size);
 
@@ -139,7 +140,7 @@ static void *mem_guardalloc(int alloc_size, int guard_size)
    ptr = (uint32 *) orig;
    for (i = alloc_size / 4; i; i--)
       *ptr++ = 0xDEADBEEF;
-   
+
    /* store the size of the newly allocated block*/
    *((uint32 *) block)++ = alloc_size;
 
@@ -162,7 +163,7 @@ static void *mem_guardalloc(int alloc_size, int guard_size)
       /* wrap */
       if ('\0' == *check)
          check = GUARD_STRING;
-      
+
       *block++ = *check++;
    }
 
@@ -326,35 +327,30 @@ char *_my_strdup(const char *string, char *file, int line)
 #else /* !NOFRENDO_DEBUG */
 
 /* allocates memory and clears it */
+static int pos = 0;
+static int last_size = 0;
 void *_my_malloc(int size)
 {
-   void *temp;
-   char fail[256];
-
-   temp = malloc(size);
-
-   if (NULL == temp)
-   {
-      sprintf(fail, "malloc: out of memory.  block size: %d\n", size);
-      ASSERT_MSG(fail);
-   }
-
-   return temp;
+  char *heap = getHeap();
+  void *temp = heap + pos;
+  printf("_my_malloc: %d, %p\n", size, temp);
+  pos += size;
+  last_size = size;
+  if(pos > 1<<16) abort();
+  return temp;
 }
 
 /* free a pointer allocated with my_malloc */
 void _my_free(void **data)
 {
-   char fail[256];
+  printf("_my_free: %p\n", data);
+  pos -= last_size;
+  last_size = 0;
+}
 
-   if (NULL == data || NULL == *data)
-   {
-      sprintf(fail, "free: attempted to free NULL pointer.\n");
-      ASSERT_MSG(fail);
-   }
-
-   free(*data);
-   *data = NULL; /* NULL our source */
+void _my_reset(void) {
+  pos = 0;
+  last_size = 0;
 }
 
 char *_my_strdup(const char *string)
@@ -387,7 +383,7 @@ void mem_checkleaks(void)
 
    if (mem_blockcount)
    {
-      log_printf("memory leak - %d unfreed block%s\n\n", mem_blockcount, 
+      log_printf("memory leak - %d unfreed block%s\n\n", mem_blockcount,
          mem_blockcount == 1 ? "" : "s");
 
       for (i = 0; i < MAX_BLOCKS; i++)

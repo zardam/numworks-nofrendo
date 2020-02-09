@@ -13,8 +13,10 @@ extern "C" {
   #include "../bitmap.h"
 }
 
-NofrendoWrapper::NofrendoWrapper()
-{
+void * heap;
+
+NofrendoWrapper::NofrendoWrapper(NES::App * app) {
+  heap = app->getHeap();
 }
 
 void NofrendoWrapper::run() {
@@ -158,4 +160,8 @@ void draw(bitmap_t *bmp, uint16 *palette) {
 
 uint64_t readKeyboard() {
   return Ion::Keyboard::scan();
+}
+
+void *getHeap() {
+  return heap;
 }

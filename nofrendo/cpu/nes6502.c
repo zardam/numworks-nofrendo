@@ -1382,7 +1382,7 @@ int nes6502_execute(int timeslice_cycles)
 
 #ifdef NES6502_JUMPTABLE
    
-   static void *opcode_table[256] =
+   static const void *opcode_table[256] =
    {
       &&op00, &&op01, &&op02, &&op03, &&op04, &&op05, &&op06, &&op07,
       &&op08, &&op09, &&op0A, &&op0B, &&op0C, &&op0D, &&op0E, &&op0F,

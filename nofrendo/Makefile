@@ -1,7 +1,6 @@
 NES_ROM ?= apps/nes/nofrendo/epsilon/2048.nes
-SFLAGS += -Iapps/nes/nofrendo -Iapps/nes/nofrendo/nes -Iapps/nes/nofrendo/sndhrdw -Iapps/nes/nofrendo/libsnss -Iapps/nes/nofrendo/cpu
+SFLAGS += -Iapps/nes/nofrendo -Iapps/nes/nofrendo/nes -Iapps/nes/nofrendo/sndhrdw -Iapps/nes/nofrendo/libsnss -Iapps/nes/nofrendo/cpu -Iapps/nes/nofrendo/epsilon
 nof_src = $(addprefix apps/nes/nofrendo/,\
-	bitmap.c \
 	config.c \
 	cpu/dis6502.c \
 	cpu/nes6502.c \
@@ -63,6 +62,7 @@ nof_src = $(addprefix apps/nes/nofrendo/,\
 	sndhrdw/vrcvisnd.c \
 	nofrendo.c \
 	epsilon/nofrendo_wrapper.cpp \
+	epsilon/statefile_wrapper.cpp \
 	epsilon/osd_epsilon.c \
 	epsilon/stubs.c \
 )

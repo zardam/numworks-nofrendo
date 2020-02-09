@@ -31,13 +31,13 @@ App * App::Snapshot::unpack(Container * container) {
   return new (container->currentAppBuffer()) App(container, this);
 }
 
-App::Snapshot::Snapshot(){
+App::Snapshot::Snapshot() {
 }
 
 void App::didBecomeActive(Window * window) {
   ::App::didBecomeActive(window);
 
-  NofrendoWrapper nofrendoWrapper;
+  NofrendoWrapper nofrendoWrapper(this);
   nofrendoWrapper.run();
 
   m_appsContainer->switchTo(m_appsContainer->appSnapshotAtIndex(0));

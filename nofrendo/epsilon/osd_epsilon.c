@@ -88,8 +88,18 @@ void osd_togglefullscreen(int code)
 {
 }
 
+static int ls = 5;
+void osd_reset() {
+  ls = 5;
+}
+
 void osd_getinput(void)
 {
+  if(ls) {
+    ls--;
+    if(!ls) event_get(event_state_load)(INP_STATE_MAKE);
+  }
+
   const int events[9]={
     event_joypad1_left,
     event_joypad1_up,
@@ -109,7 +119,12 @@ void osd_getinput(void)
 
   if(cur_keys_pressed & (1<<17)) {
     event_get(event_hard_reset)(INP_STATE_MAKE);
+  } else if(cur_keys_pressed & (1<<16)) {
+    event_get(event_state_load)(INP_STATE_MAKE);
+  } else if(cur_keys_pressed & (1<<15)) {
+    event_get(event_state_save)(INP_STATE_MAKE);
   } else if(cur_keys_pressed > 511) {
+    event_get(event_state_save)(INP_STATE_MAKE);
     event_get(event_quit)(INP_STATE_MAKE);
   }
   for (int i=0; i<9; i++) {

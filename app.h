@@ -24,10 +24,13 @@ public:
   };
   virtual void didBecomeActive(Window * window);
   virtual void willBecomeInactive();
+  void * getHeap() { return this->m_nesHeap; };
 private:
   App(Container * container, Snapshot * snapshot);
   NesController m_nesController;
   AppsContainer * m_appsContainer;
+  static constexpr int k_nesHeapSize = 1<<16;
+  char m_nesHeap[k_nesHeapSize];
 };
 
 }

@@ -82,7 +82,7 @@ void main_eject(void)
    {
    case system_nes:
       nes_poweroff();
-      //nes_destroy(&(console.machine.nes));
+      nes_destroy(&(console.machine.nes));
       break;
 
    default:
@@ -111,6 +111,9 @@ void main_quit(void)
       console.nextfilename = NULL;
    }
    console.nexttype = system_unknown;
+
+   _my_reset();
+   osd_reset();
 }
 
 /* brute force system autodetection */
@@ -144,19 +147,14 @@ static int internal_insert(const char *filename, system_t type)
    case system_nes:
       gui_setrefresh(NES_REFRESH_RATE);
 
-if(console.machine.nes == NULL) {
       console.machine.nes = nes_create();
       if (NULL == console.machine.nes)
       {
          log_printf("Failed to create NES instance.\n");
          return -1;
       }
-
       if (nes_insertcart(console.filename, console.machine.nes))
          return -1;
-} else {
-  nes_getcontextptr()->poweroff = false;
-}
 
       vid_setmode(NES_SCREEN_WIDTH, NES_VISIBLE_HEIGHT);
 
