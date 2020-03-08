@@ -1,3 +1,7 @@
+ifeq ($(NES),webnofrendo)
+SFLAGS += -DWEBNOFRENDO
+endif
+
 ifeq ($(PLATFORM),device)
 SFLAGS += -DDEVICE
 endif

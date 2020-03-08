@@ -67,7 +67,7 @@ nof_src = $(addprefix apps/nes/nofrendo/,\
 	epsilon/stubs.c \
 )
 
-ifneq ($(PLATFORM),device)
+ifneq ($(NES),webnofrendo)
 nof_src += $(addprefix apps/nes/nofrendo/,\
 	epsilon/rom.c \
 )

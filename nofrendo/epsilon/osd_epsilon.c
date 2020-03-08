@@ -168,7 +168,7 @@ int osd_init()
 	return 0;
 }
 
-#if DEVICE
+#if WEBNOFRENDO
 extern const unsigned char _data_section_start_flash;
 extern const unsigned char _data_section_start_ram;
 extern const unsigned char _data_section_end_ram;
